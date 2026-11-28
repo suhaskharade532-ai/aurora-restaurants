@@ -51,6 +51,20 @@ function checkout(){if(!qty()){alert("Please add a dish to your cart first.");re
 function placeOrder(){let order={no:Date.now().toString().slice(-5),table:document.getElementById("table").value,items:dishes.filter(d=>cart[d.id]).map(d=>`${d.n} × ${cart[d.id]}`),total:sub()+Math.round(sub()*.05),payment:document.querySelector('input[name="pay"]:checked').value,status:"Received"};orders.unshift(order);cart={};renderMenu();document.getElementById("checkoutmsg").textContent=`Demo order #${order.no} received for Table ${order.table}. Payment: ${order.payment}. No real payment or kitchen transmission occurred.`;setTimeout(()=>show("kitchen"),600)}
 function renderOrders(){document.getElementById("orders").innerHTML=orders.length?orders.map((o,i)=>`<div class="order"><div class="toprow"><b>Order #${o.no} · Table ${o.table}</b><span class="status">${o.status}</span></div><p class="muted">${o.items.join("<br>")}</p><div class="toprow"><b>${ru(o.total)}</b><select class="field" style="width:auto;margin:0" onchange="orders[${i}].status=this.value;renderOrders()"><option ${o.status==="Received"?"selected":""}>Received</option><option ${o.status==="Preparing"?"selected":""}>Preparing</option><option ${o.status==="Ready"?"selected":""}>Ready</option><option ${o.status==="Served"?"selected":""}>Served</option></select></div></div>`).join(""):'<div class="box"><p class="muted">No orders yet. Place a demo order from the customer menu.</p></div>'}
 function renderAdmin(){document.getElementById("adminmenu").innerHTML=dishes.map(d=>`<div class="totalrow"><span>${d.e} ${d.n}</span><b>${ru(d.p)}</b></div>`).join("")}
-document.getElementById("table").addEventListener("change",renderCart);renderMenu();
+// Read table number from QR URL
+const qrTable = new URLSearchParams(window.location.search).get("table");
+if (
+  qrTable &&
+  /^\d{1,2}$/.test(qrTable) &&
+  Number(qrTable) >= 1 &&
+  Number(qrTable) <= 99
+) {
+  document.getElementById("table").value =
+    String(Number(qrTable)).padStart(2, "0");
+}
+// Update table details and menu
+document.getElementById("table").addEventListener("change", renderCart);
+
+renderMenu();
 </script>
 </body></html>
